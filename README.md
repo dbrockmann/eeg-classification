@@ -1,2 +1,1 @@
-# eeg-classification
-Comparison of Handcrafted Features and Autoencoders for Epileptic Seizure Detection
+# Comparison of Handcrafted Features and Autoencoders for Epileptic Seizure Detection
