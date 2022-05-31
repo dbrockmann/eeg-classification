@@ -20,6 +20,9 @@ class Decoder(tf.keras.Model):
         Args:
             x: the input
             training: flag stating if in training mode
+
+        Returns:
+            output of the model
         """
 
         x = self.dense(x, training=training)
