@@ -11,8 +11,8 @@ def load_dataset(data_dir):
         data_dir: folder containing the dataset
 
     Returns:
-        data: numpy array of shape(n_samples, n_features) containg the data vectors
-        labels: numpy array of shape(n_samples) containing the target values
+        data: numpy array of shape(n_recordings, n_samples) containg the data vectors
+        labels: numpy array of shape(n_recordings) containing the target values
     """
 
     data_per_recording = list()
