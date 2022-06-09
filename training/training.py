@@ -3,6 +3,51 @@ import tensorflow as tf
 import numpy as np
 
 
+def train_model(model, train_data, test_data, loss_fn, optimizer, epochs):
+    """
+    Training loop with testing
+
+    Args:
+        model: the model to train
+        train_data: train dataset
+        test_data: test dataset
+        loss_fn: loss function
+        optimizer: the optimizer
+        epochs: number of epochs to train
+
+    Returns:
+        aggregated training and test losses
+    """
+
+    # train loss aggregator
+    train_loss_agg = []
+
+    # test loss aggregator
+    test_loss_agg = []
+
+    # test on train data before first training
+    train_loss = test(model, train_data, loss_fn)
+    train_loss_agg.append(train_loss)
+
+    # test on test data before first training
+    test_loss = test(model, test_data, loss_fn)
+    test_loss_agg.append(test_loss)
+
+    # repeat training/testing for number of epochs
+    for _ in range(epochs):
+
+        # training
+        train_loss = train(model, train_data, loss_fn, optimizer)
+        train_loss_agg.append(train_loss)
+
+        # testing
+        test_loss = test(model, test_data, loss_fn)
+        test_loss_agg.append(test_loss)
+
+    # return aggregated training and test losses
+    return train_loss_agg, test_loss_agg
+
+
 def train(model, data, loss_fn, optimizer, training=True):
     """
     Performs training on a full dataset and aggregates the losses
