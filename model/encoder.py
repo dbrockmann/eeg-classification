@@ -13,8 +13,10 @@ class Encoder(tf.keras.Model):
 
         super(Encoder, self).__init__()
 
-        self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(latent_dim, activation='relu')
+        self.dense1 = tf.keras.layers.Dense(128, activation='relu')
+        self.dense2 = tf.keras.layers.Dense(64, activation='relu')
+        self.dense3 = tf.keras.layers.Dense(latent_dim, activation='sigmoid')
+        self.regularization = tf.keras.layers.ActivityRegularization(l1=1e-3)
 
     @tf.function
     def call(self, x, training):
@@ -29,6 +31,8 @@ class Encoder(tf.keras.Model):
             output of the model
         """
 
-        x = self.flatten(x, training=training)
-        x = self.dense(x, training=training)
+        x = self.dense1(x, training=training)
+        x = self.dense2(x, training=training)
+        x = self.dense3(x, training=training)
+        x = self.regularization(x, training=training)
         return x
