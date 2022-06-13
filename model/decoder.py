@@ -1,5 +1,6 @@
 
 import tensorflow as tf
+import numpy as np
 
 class Decoder(tf.keras.Model):
 
@@ -13,9 +14,10 @@ class Decoder(tf.keras.Model):
 
         super(Decoder, self).__init__()
 
-        self.dense1 = tf.keras.layers.Dense(64, activation='relu')
-        self.dense2 = tf.keras.layers.Dense(128, activation='relu')
-        self.dense3 = tf.keras.layers.Dense(input_dim, activation='sigmoid')
+        self.dense1 = tf.keras.layers.Dense(64, activation='sigmoid')
+        self.dense2 = tf.keras.layers.Dense(128, activation='sigmoid')
+        self.dense3 = tf.keras.layers.Dense(np.prod(input_dim), activation='sigmoid')
+        self.reshape = tf.keras.layers.Reshape(input_dim)
 
     @tf.function
     def call(self, x, training):
@@ -33,4 +35,5 @@ class Decoder(tf.keras.Model):
         x = self.dense1(x, training=training)
         x = self.dense2(x, training=training)
         x = self.dense3(x, training=training)
+        x = self.reshape(x, training=training)
         return x
