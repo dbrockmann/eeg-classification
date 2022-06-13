@@ -3,14 +3,14 @@ import tensorflow as tf
 import numpy as np
 
 
-def train_model(model, train_data, test_data, loss_fn, optimizer, epochs):
+def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs):
     """
     Training loop with testing
 
     Args:
         model: the model to train
-        train_data: train dataset
-        test_data: test dataset
+        train_ds: train dataset
+        test_ds: test dataset
         loss_fn: loss function
         optimizer: the optimizer
         epochs: number of epochs to train
@@ -26,35 +26,35 @@ def train_model(model, train_data, test_data, loss_fn, optimizer, epochs):
     test_loss_agg = []
 
     # test on train data before first training
-    train_loss = test(model, train_data, loss_fn)
+    train_loss = test(model, train_ds, loss_fn)
     train_loss_agg.append(train_loss)
 
     # test on test data before first training
-    test_loss = test(model, test_data, loss_fn)
+    test_loss = test(model, test_ds, loss_fn)
     test_loss_agg.append(test_loss)
 
     # repeat training/testing for number of epochs
     for _ in range(epochs):
 
         # training
-        train_loss = train(model, train_data, loss_fn, optimizer)
+        train_loss = train(model, train_ds, loss_fn, optimizer)
         train_loss_agg.append(train_loss)
 
         # testing
-        test_loss = test(model, test_data, loss_fn)
+        test_loss = test(model, test_ds, loss_fn)
         test_loss_agg.append(test_loss)
 
     # return aggregated training and test losses
     return train_loss_agg, test_loss_agg
 
 
-def train(model, data, loss_fn, optimizer, training=True):
+def train(model, ds, loss_fn, optimizer, training=True):
     """
     Performs training on a full dataset and aggregates the losses
 
     Args:
         model: the model to train
-        data: the train dataset
+        ds: the train dataset
         loss_fn: loss function
         optimizer: the optimizer
         training: flag stating if in training mode
@@ -67,7 +67,7 @@ def train(model, data, loss_fn, optimizer, training=True):
     loss_agg = []
 
     # for input and target in dataset
-    for x, t in data:
+    for x, t in ds:
 
         # calculate loss
         loss = train_step(model, x, t, loss_fn, optimizer, training)
@@ -117,13 +117,13 @@ def train_step(model, x, t, loss_fn, optimizer, training):
     return loss
 
 
-def test(model, data, loss_fn, training=False):
+def test(model, ds, loss_fn, training=False):
     """
     Tests performance on a full dataset and aggregates the losses
 
     Args:
         model: the model to train
-        data: the train dataset
+        ds: the train dataset
         loss_fn: loss function
         training: flag stating if in training mode
 
@@ -135,7 +135,7 @@ def test(model, data, loss_fn, training=False):
     loss_agg = []
 
     # for input and target in dataset
-    for x, t in data:
+    for x, t in ds:
 
         # calculate loss
         loss = test_step(model, x, t, loss_fn, training)
@@ -150,14 +150,15 @@ def test(model, data, loss_fn, training=False):
     return loss
 
 
-def test_step(model, data, loss_fn, training=False):
+def test_step(model, x, t, loss_fn, training):
     """
     Calculates loss by performing a forward
     step on a test datapoint
 
     Args:
         model: the model to test
-        data: the test dataset
+        x: input
+        t: target output
         loss_fn: loss function
         training: flag stating if in training mode
 
@@ -166,7 +167,7 @@ def test_step(model, data, loss_fn, training=False):
     """
 
     # forward step
-    prediction = model(x, testing)
+    prediction = model(x, training)
 
     # calculate loss
     loss = loss_fn(t, prediction)
