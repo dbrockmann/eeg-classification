@@ -6,18 +6,19 @@ from decoder import Decoder
 
 class Autoencoder(tf.keras.Model):
 
-    def __init__(self, latent_dim):
+    def __init__(self, input_dim, latent_dim):
         """
         Initializes the Autoencoder consisting of an Encoder and a Decoder
 
         Args:
+            input_dim: input dimensions
             latent_dim: dimensions of the latent space
         """
 
         super(Autoencoder, self).__init__()
 
         self.encoder = Encoder(latent_dim)
-        self.decoder = Decoder()
+        self.decoder = Decoder(input_dim)
 
     @tf.function
     def call(self, x, training):
