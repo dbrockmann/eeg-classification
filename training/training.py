@@ -99,7 +99,7 @@ def train_step(model, x, t, loss_fn, optimizer, training):
         calculated loss
     """
 
-    with tf.GradientType() as type:
+    with tf.GradientTape() as tape:
 
         # forward step
         prediction = model(x, training)
