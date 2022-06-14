@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.signal import butter, lfilter
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 def butter_bandpass(lowcut, highcut, frequency, order=5):
