@@ -44,7 +44,7 @@ def butter_bandpass_filter(data, b, a):
 
     return y
 
-def standard_scaler(data):
+def minmax_scaler(data):
     """
     Design the scaler.
 
@@ -54,15 +54,14 @@ def standard_scaler(data):
     Returns:
         fitted_scaler: fitted scaler
     """
-    scaler = StandardScaler()
-
+    scaler = MinMaxScaler()
     fitted_scaler = scaler.fit(data)
 
     return fitted_scaler
 
-def standardize_data(scaler, data):
+def normalize_data(scaler, data):
     """
-    Perform standardization by centering and scaling
+    Scales each feature to a range between zero and one.
 
     Args:
         scaler: scaler used to scale the data along the features axis
@@ -168,7 +167,7 @@ def prepare_data(X, y):
     data, labels = split_dataset(X, y)
 
     # define the scaler (on the test set in order to prevent data leakage)
-    scaler = standard_scaler(data[0])
+    scaler = minmax_scaler(data[0])
 
     # define the filter coefficients for the butterworth band-pass filter
     LOWCUT = 0.5
@@ -186,8 +185,8 @@ def prepare_data(X, y):
     # apply the preprocessing pipeline to the different sets
     for X, y in zip(data, labels):
         filtered_X = butter_bandpass_filter(X,b,a)
-        standardized_X = standardize_data(scaler, filtered_X)
-        prepared_X, prepared_y = windowing(standardized_X, y, WINDOWSIZE)
+        normalized_X = normalize_data(scaler, filtered_X)
+        prepared_X, prepared_y = windowing(normalized_X, y, WINDOWSIZE)
         prepared_data.append(prepared_X)
         prepared_labels.append(prepared_y)
 
