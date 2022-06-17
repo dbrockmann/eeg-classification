@@ -18,18 +18,17 @@ def train_autoencoder(model, train_ds, test_ds, show=False):
     """
 
     # cache, batch and prefetch
-    train_ds = train_ds.cache().batch(12).prefetch(8)
-    test_ds = test_ds.cache().batch(12).prefetch(8)
+    train_ds = train_ds.cache().batch(32).prefetch(4)
+    test_ds = test_ds.cache().batch(32).prefetch(4)
 
     # number of training epochs
-    epochs = 10
+    epochs = 20
 
     # learning rate for optimizer
-    learning_rate = 0.05
+    learning_rate = 0.001
 
     # loss function: MSE
     loss_fn = tf.keras.losses.MeanSquaredError()
-    #loss_fn = tf.keras.losses.BinaryCrossentropy()
 
     # optimizer: Adam
     optimizer = tf.keras.optimizers.Adam(learning_rate)
