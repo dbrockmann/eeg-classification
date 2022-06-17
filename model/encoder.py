@@ -36,5 +36,5 @@ class Encoder(tf.keras.Model):
         x = self.dense1(x, training=training)
         x = self.dense2(x, training=training)
         x = self.dense3(x, training=training)
-        x = self.regularization(x, training=training)
+        #x = self.regularization(x, training=training)
         return x

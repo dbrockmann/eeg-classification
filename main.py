@@ -20,11 +20,7 @@ autoencoder_train_ds = tf.data.Dataset.from_tensor_slices((train_data, train_dat
 autoencoder_test_ds = tf.data.Dataset.from_tensor_slices((test_data, test_data))
 
 # create autoencoder model
-autoencoder = Autoencoder(train_data.shape[1:], 8)
+autoencoder = Autoencoder(train_data.shape[1:], 32)
 
 # train autoencoder model
-autoencoder_train_loss, autoencoder_test_loss = train_autoencoder(autoencoder, autoencoder_train_ds, autoencoder_test_ds)
-
-# print losses
-for epoch, (train_loss, test_loss) in enumerate(zip(autoencoder_train_loss, autoencoder_test_loss)):
-    print(f'Epoch {epoch}: train loss {train_loss}, test loss {test_loss}')
+autoencoder_train_loss, autoencoder_test_loss = train_autoencoder(autoencoder, autoencoder_train_ds, autoencoder_test_ds, show=True)

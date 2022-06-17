@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs):
+def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs, show=False):
     """
     Training loop with testing
 
@@ -14,6 +14,7 @@ def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs):
         loss_fn: loss function
         optimizer: the optimizer
         epochs: number of epochs to train
+        show: print loss after every epoch
 
     Returns:
         aggregated training and test losses
@@ -33,8 +34,12 @@ def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs):
     test_loss = test(model, test_ds, loss_fn)
     test_loss_agg.append(test_loss)
 
+    # print loss if show flag is set
+    if (show):
+        print(f'Epoch 0: train loss {train_loss}, test loss {test_loss}')
+
     # repeat training/testing for number of epochs
-    for _ in range(epochs):
+    for epoch in range(epochs):
 
         # training
         train_loss = train(model, train_ds, loss_fn, optimizer)
@@ -43,6 +48,10 @@ def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs):
         # testing
         test_loss = test(model, test_ds, loss_fn)
         test_loss_agg.append(test_loss)
+
+        # print loss if show flag is set
+        if (show):
+            print(f'Epoch {epoch + 1}: train loss {train_loss}, test loss {test_loss}')
 
     # return aggregated training and test losses
     return train_loss_agg, test_loss_agg
