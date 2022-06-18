@@ -1,32 +1,41 @@
 
 import tensorflow as tf
 
-from training import train_model
+from training.training import train_model
 
 
-def train_autoencoder(model, train_data, test_data):
+def train_autoencoder(model, train_ds, test_ds, show=False):
     """
     Train autoencoder model
 
     Args:
         model: autoencoder model
-        train_data: train dataset
-        test_data: test dataset
+        train_ds: train dataset
+        test_ds: test dataset
+        show: print loss after every epoch
+
+    Returns:
+        aggregated training and test losses
     """
 
+    # cache, batch and prefetch
+    train_ds = train_ds.cache().batch(32).prefetch(4)
+    test_ds = test_ds.cache().batch(32).prefetch(4)
+
     # number of training epochs
-    epochs = 10
+    epochs = 20
 
     # learning rate for optimizer
     learning_rate = 0.001
 
-    # loss function: mean squared error
-    loss_fn = tf.keras.losses.MeanSquaredError(
-        reduction=tf.keras.losses.Reduction.AUTO
-    )
+    # loss function: MSE
+    loss_fn = tf.keras.losses.MeanSquaredError()
 
     # optimizer: Adam
     optimizer = tf.keras.optimizers.Adam(learning_rate)
 
     # train model
-    train_loss, test_loss = train_model(model, train_data, test_data, loss_fn, optimizer, epochs)
+    train_loss, test_loss = train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs, show)
+
+    return train_loss, test_loss
+

@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 
-from training import train_model
+from training.training import train_model
 
 
 def train_classifier(model, train_data, test_data):
