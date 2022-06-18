@@ -45,7 +45,8 @@ class Encoder(tf.keras.Model):
         self.flatten = tf.keras.layers.Flatten()
 
         self.dense = tf.keras.layers.Dense(
-            latent_dim, activation='relu'
+            latent_dim, activation='relu',
+            activity_regularizer=tf.keras.regularizers.L1(0.001)
         )
 
         #self.flatten = tf.keras.layers.Flatten()
