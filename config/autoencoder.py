@@ -6,10 +6,12 @@ from tensorflow.keras.regularizers import L1
 
 sparse_ae = {
 
-    'batch_size': 32,
-    'loss_function': MeanSquaredError(),
-    'optimizer': Adam(lr=0.001),
-    'epochs': 20,
+    'training': {
+        'batch_size': 32,
+        'loss_function': MeanSquaredError(),
+        'optimizer': Adam(lr=0.001),
+        'epochs': 20
+    },
 
     'encoder': [
         Flatten(),

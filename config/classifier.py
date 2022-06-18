@@ -5,12 +5,14 @@ from tensorflow.keras.layers import Dense
 
 softmax_cf = {
 
-    'batch_size': 32,
-    'loss_function': BinaryCrossentropy(),
-    'optimizer': Adam(lr=0.001),
-    'epochs': 10,
+    'training': {
+        'batch_size': 32,
+        'loss_function': BinaryCrossentropy(),
+        'optimizer': Adam(lr=0.001),
+        'epochs': 10
+    },
 
-    'classifier': [
+    'model': [
         Dense(
             32, activation='relu'
         ),
