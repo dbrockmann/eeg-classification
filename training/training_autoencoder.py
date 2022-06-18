@@ -12,6 +12,7 @@ def train_autoencoder(model, train_ds, test_ds, show=False):
         model: autoencoder model
         train_ds: train dataset
         test_ds: test dataset
+        show: print loss after every epoch
 
     Returns:
         aggregated training and test losses
