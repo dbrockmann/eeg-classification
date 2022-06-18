@@ -14,7 +14,6 @@ sparse_ae = {
     },
 
     'encoder': [
-        Flatten(),
         Dense(
             128, activation='relu'
         ),
