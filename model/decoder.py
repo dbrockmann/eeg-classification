@@ -74,12 +74,16 @@ class Decoder(tf.keras.Model):
 
         x = self.dense(x, training=training)
         x = self.reshape1(x, training=training)
+
         x = self.conv1(x, training=training)
         x = self.upsampling1(x, training=training)
+
         x = self.conv2(x, training=training)
         x = self.upsampling2(x, training=training)
+
         x = self.conv3(x, training=training)
         x = self.upsampling3(x, training=training)
+        
         x = self.conv4(x, training=training)
         x = self.reshape2(x, training=training)
 
