@@ -1,21 +1,23 @@
 
-import tensorflow as tf
+from tensorflow.keras.losses import BinaryCrossentropy
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Dense
 
 softmax_cf = {
 
     'batch_size': 32,
-    'loss_function': tf.keras.losses.BinaryCrossentropy(),
-    'optimizer': tf.keras.optimizers.Adam(lr=0.001),
+    'loss_function': BinaryCrossentropy(),
+    'optimizer': Adam(lr=0.001),
     'epochs': 10,
 
     'classifier': [
-        tf.keras.layers.Dense(
+        Dense(
             32, activation='relu'
         ),
-        tf.keras.layers.Dense(
+        Dense(
             16, activation='relu'
         ),
-        tf.keras.layers.Dense(
+        Dense(
             1, activation='softmax'
         )
     ]
