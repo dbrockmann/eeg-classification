@@ -2,6 +2,7 @@
 from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Flatten, Dense, Reshape, Conv1D, Conv1DTranspose, MaxPooling1D, UpSampling1D
+from tensorflow.keras.regularizers import L1
 
 sparse_ae = {
 
@@ -20,7 +21,7 @@ sparse_ae = {
         ),
         Dense(
             8, activation='sigmoid',
-            activity_regularizer=tf.keras.regularizers.L1(0.001)
+            activity_regularizer=L1(0.001)
         )
     ],
 
@@ -41,8 +42,8 @@ sparse_ae = {
 convolutional_ae = {
 
     'batch_size': 32,
-    'loss_function': tf.keras.losses.MeanSquaredError(),
-    'optimizer': tf.keras.optimizers.Adam(lr=0.001),
+    'loss_function': MeanSquaredError(),
+    'optimizer': Adam(lr=0.001),
     'epochs': 20,
 
     'encoder': [
@@ -70,7 +71,7 @@ convolutional_ae = {
         Flatten(),
         Dense(
             8, activation='relu',
-            activity_regularizer=tf.keras.regularizers.L1(0.001)
+            activity_regularizer=L1(0.001)
         )
     ],
 
