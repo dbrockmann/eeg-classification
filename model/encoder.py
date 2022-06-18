@@ -13,7 +13,7 @@ class Encoder(tf.keras.Model):
 
         super(Encoder, self).__init__()
 
-
+        """
         self.reshape = tf.keras.layers.Reshape(
             (-1, 1)
         )
@@ -48,12 +48,22 @@ class Encoder(tf.keras.Model):
             latent_dim, activation='relu',
             activity_regularizer=tf.keras.regularizers.L1(0.001)
         )
+        """
 
-        #self.flatten = tf.keras.layers.Flatten()
-        #self.dense1 = tf.keras.layers.Dense(128, activation='relu')
-        #self.dense2 = tf.keras.layers.Dense(64, activation='relu')
-        #self.dense3 = tf.keras.layers.Dense(latent_dim, activation='sigmoid')
-        #self.regularization = tf.keras.layers.ActivityRegularization(l1=1e-3)
+        self.flatten = tf.keras.layers.Flatten()
+
+        self.dense1 = tf.keras.layers.Dense(
+            128, activation='relu'
+        )
+
+        self.dense2 = tf.keras.layers.Dense(
+            64, activation='relu'
+        )
+
+        self.dense3 = tf.keras.layers.Dense(
+            latent_dim, activation='sigmoid',
+            activity_regularizer=tf.keras.regularizers.L1(0.001)
+        )
 
 
     @tf.function
@@ -69,6 +79,7 @@ class Encoder(tf.keras.Model):
             output of the model
         """
 
+        """
         x = self.reshape(x, training=training)
 
         x = self.conv1(x, training=training)
@@ -82,10 +93,12 @@ class Encoder(tf.keras.Model):
 
         x = self.flatten(x, training=training)
         x = self.dense(x, training=training)
+        """
 
-        #x = self.flatten(x, training=training)
-        #x = self.dense1(x, training=training)
-        #x = self.dense2(x, training=training)
-        #x = self.dense3(x, training=training)
-        #x = self.regularization(x, training=training)
+        x = self.flatten(x, training=training)
+        
+        x = self.dense1(x, training=training)
+        x = self.dense2(x, training=training)
+        x = self.dense3(x, training=training)
+
         return x

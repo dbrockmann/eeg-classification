@@ -14,6 +14,7 @@ class Decoder(tf.keras.Model):
 
         super(Decoder, self).__init__()
 
+        """
         self.dense = tf.keras.layers.Dense(
             np.prod(input_dim) // 8 * 64
         )
@@ -53,11 +54,23 @@ class Decoder(tf.keras.Model):
         self.reshape2 = tf.keras.layers.Reshape(
             input_dim
         )
+        """
 
-        #self.dense1 = tf.keras.layers.Dense(64, activation='relu')
-        #self.dense2 = tf.keras.layers.Dense(128, activation='relu')
-        #self.dense3 = tf.keras.layers.Dense(np.prod(input_dim), activation='sigmoid')
-        #self.reshape = tf.keras.layers.Reshape(input_dim)
+        self.dense1 = tf.keras.layers.Dense(
+            64, activation='relu'
+        )
+
+        self.dense2 = tf.keras.layers.Dense(
+            128, activation='relu'
+        )
+
+        self.dense3 = tf.keras.layers.Dense(
+            np.prod(input_dim), activation='sigmoid'
+        )
+
+        self.reshape = tf.keras.layers.Reshape(
+            input_dim
+        )
 
     @tf.function
     def call(self, x, training):
@@ -72,6 +85,7 @@ class Decoder(tf.keras.Model):
             output of the model
         """
 
+        """
         x = self.dense(x, training=training)
         x = self.reshape1(x, training=training)
 
@@ -86,9 +100,12 @@ class Decoder(tf.keras.Model):
         
         x = self.conv4(x, training=training)
         x = self.reshape2(x, training=training)
+        """
 
-        #x = self.dense1(x, training=training)
-        #x = self.dense2(x, training=training)
-        #x = self.dense3(x, training=training)
-        #x = self.reshape(x, training=training)
+        x = self.dense1(x, training=training)
+        x = self.dense2(x, training=training)
+        x = self.dense3(x, training=training)
+
+        x = self.reshape(x, training=training)
+        
         return x
