@@ -13,9 +13,17 @@ class Classifier(tf.keras.Model):
 
         super(Classifier, self).__init__()
 
-        self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(64, activation='relu')
-        self.softmax = tf.keras.layers.Dense(class_dim, activation='softmax')
+        self.dense1 = tf.keras.layers.Dense(
+            32, activation='relu'
+        )
+
+        self.dense2 = tf.keras.layers.Dense(
+            16, activation='relu'
+        )
+
+        self.dense3 = tf.keras.layers.Dense(
+            class_dim, activation='softmax'
+        )
 
     @tf.function
     def call(self, x, training):
@@ -30,7 +38,8 @@ class Classifier(tf.keras.Model):
             output of the model
         """
 
-        x = self.flatten(x, training=training)
-        x = self.dense(x, training=training)
-        x = self.softmax(x)
+        x = self.dense1(x, training=training)
+        x = self.dense2(x, training=training)
+        x = self.dense3(x, training=training)
+
         return x
