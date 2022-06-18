@@ -4,14 +4,18 @@ import tensorflow as tf
 from training.training import train_model
 
 
-def train_classifier(model, train_data, test_data):
+def train_classifier(model, train_ds, test_ds, show=False):
     """
     Train classifier model
 
     Args:
         model: classifier model
-        train_data: train dataset
-        test_data: test dataset
+        train_ds: train dataset
+        test_ds: test dataset
+        show: print loss after every epoch
+
+    Returns:
+        aggregated training and test losses
     """
 
     # number of training epochs
@@ -21,10 +25,12 @@ def train_classifier(model, train_data, test_data):
     learning_rate = 0.001
 
     # loss function: categorical cross entropy
-    loss_fn = tf.keras.losses.CategoricalCrossentropy()
+    loss_fn = tf.keras.losses.BinaryCrossentropy()
 
     # optimizer: Adam
     optimizer = tf.keras.optimizers.Adam(learning_rate)
 
     # train model
-    train_loss, test_loss = train_model(model, train_data, test_data, loss_fn, optimizer, epochs)
+    train_loss, test_loss = train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs, show)
+
+    return train_loss, test_loss
