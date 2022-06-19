@@ -3,11 +3,13 @@ from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dense
 
-softmax_cf = {
+binary_cf = {
 
     'training': {
         'batch_size': 32,
-        'loss_function': BinaryCrossentropy(),
+        'loss_function': BinaryCrossentropy(
+            from_logits=True
+        ),
         'optimizer': Adam(
             learning_rate=0.001
         ),
@@ -25,7 +27,7 @@ softmax_cf = {
         ),
         Dense(
             units=1, 
-            activation='softmax'
+            activation=None
         )
     ]
 
