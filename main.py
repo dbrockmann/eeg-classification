@@ -1,13 +1,13 @@
 
 from tensorflow.data import Dataset
+from tensorflow.keras import Sequential
 
 from dataset import load_dataset
 from preprocessing import prepare_data
-from model import Model_From_Layers
 from training import train_from_config
 
-from config.autoencoder import sparse_ae, convolutional_ae
-from config.classifier import binary_cf
+from model.autoencoder import sparse_ae, convolutional_ae
+from model.classifier import binary_cf
 
 # load dataset
 X, y = load_dataset('./data/')
@@ -28,9 +28,9 @@ ae_train_ds = Dataset.from_tensor_slices((train_data, train_data))
 ae_test_ds = Dataset.from_tensor_slices((test_data, test_data))
 
 # create autoencoder model
-encoder = Model_From_Layers(sparse_ae['encoder'])
-decoder = Model_From_Layers(sparse_ae['decoder'])
-autoencoder = Model_From_Layers([encoder, decoder])
+encoder = sparse_ae['encoder']
+decoder = sparse_ae['decoder']
+autoencoder = Sequential([encoder, decoder])
 
 # train autoencoder model
 ae_train_loss, ae_test_loss = train_from_config(
@@ -50,7 +50,7 @@ cf_train_ds = Dataset.from_tensor_slices((cf_train_data, train_labels))
 cf_test_ds = Dataset.from_tensor_slices((cf_test_data, test_labels))
 
 # create classifier model
-classifier = Model_From_Layers(binary_cf['model'])
+classifier = binary_cf['model']
 
 # train classifier
 cf_train_loss, cf_test_loss = train_from_config(

@@ -1,6 +1,8 @@
 
 from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.metrics import MeanSquaredError as MeanSquaredErrorMetric
+from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Flatten, Dense, Reshape, Conv1D, Conv1DTranspose, MaxPooling1D, UpSampling1D
 from tensorflow.keras.regularizers import L1
 
@@ -15,7 +17,7 @@ sparse_ae = {
         'epochs': 20
     },
 
-    'encoder': [
+    'encoder': Sequential([
         Dense(
             units=128, 
             activation='relu'
@@ -31,9 +33,9 @@ sparse_ae = {
                 l1=0.001
             )
         )
-    ],
+    ]),
 
-    'decoder': [
+    'decoder': Sequential([
         Dense(
             units=64, 
             activation='relu'
@@ -46,7 +48,7 @@ sparse_ae = {
             units=240, 
             activation='sigmoid'
         )
-    ]
+    ])
 
 }
 
@@ -59,7 +61,7 @@ convolutional_ae = {
     ),
     'epochs': 20,
 
-    'encoder': [
+    'encoder': Sequential([
         Reshape(
             target_shape=(-1, 1)
         ),
@@ -98,9 +100,9 @@ convolutional_ae = {
                 l1=0.001
             )
         )
-    ],
+    ]),
 
-    'decoder': [
+    'decoder': Sequential([
         Dense(
             units=240 // 2**3 * 64
         ),
@@ -140,6 +142,6 @@ convolutional_ae = {
             padding='same', 
             activation='sigmoid'
         )
-    ]
+    ])
 
 }

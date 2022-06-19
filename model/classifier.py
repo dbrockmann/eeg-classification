@@ -1,6 +1,7 @@
 
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense
 
 binary_cf = {
@@ -16,7 +17,7 @@ binary_cf = {
         'epochs': 10
     },
 
-    'model': [
+    'model': Sequential([
         Dense(
             units=32, 
             activation='relu'
@@ -29,6 +30,6 @@ binary_cf = {
             units=1, 
             activation=None
         )
-    ]
+    ])
 
 }
