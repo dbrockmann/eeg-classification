@@ -1,36 +1,35 @@
 
-import tensorflow as tf
+from tensorflow.keras.losses import BinaryCrossentropy
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense
 
-class Classifier(tf.keras.Model):
+binary_cf = {
 
-    def __init__(self, class_dim):
-        """
-        Initializes the Classifier model layers
+    'training': {
+        'batch_size': 32,
+        'loss_function': BinaryCrossentropy(
+            from_logits=True
+        ),
+        'optimizer': Adam(
+            learning_rate=0.001
+        ),
+        'epochs': 10
+    },
 
-        Args:
-            class_dim: number of classes
-        """
+    'model': Sequential([
+        Dense(
+            units=32, 
+            activation='relu'
+        ),
+        Dense(
+            units=16, 
+            activation='relu'
+        ),
+        Dense(
+            units=1, 
+            activation=None
+        )
+    ])
 
-        super(Classifier, self).__init__()
-
-        self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(64, activation='relu')
-        self.softmax = tf.keras.layers.Dense(class_dim, activation='softmax')
-
-    @tf.function
-    def call(self, x, training):
-        """
-        Compute output of the model given an input
-
-        Args:
-            x: the input
-            training: flag stating if in training mode
-
-        Returns:
-            output of the model
-        """
-
-        x = self.flatten(x, training=training)
-        x = self.dense(x, training=training)
-        x = self.softmax(x)
-        return x
+}
