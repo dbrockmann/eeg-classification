@@ -11,11 +11,7 @@ def train_from_config(model, train_ds, test_ds, config, show=False):
         model: the model to train
         train_ds: train dataset
         test_ds: test dataset
-        config:
-            batch_size: batch size
-            loss_function: loss function
-            optimizer: the optimizer
-            epochs: number of epochs to train
+        config: dictionary with training configurations
         show: print loss after every epoch
 
     Returns:
