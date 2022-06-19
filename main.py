@@ -1,10 +1,13 @@
 
-import tensorflow as tf
+from tensorflow.data import Dataset
 
 from dataset import load_dataset
 from preprocessing import prepare_data
-from model.autoencoder import Autoencoder
-from training.training_autoencoder import train_autoencoder
+from model import Model_From_Layers
+from training import train_from_config
+
+from config.autoencoder import sparse_ae, convolutional_ae
+from config.classifier import softmax_cf
 
 # load dataset
 X, y = load_dataset('./data/')
@@ -19,12 +22,16 @@ for i, a in enumerate(data):
 # extract splitted data
 train_data, test_data, val_data = data
 
-# create tensorflow dataset
-autoencoder_train_ds = tf.data.Dataset.from_tensor_slices((train_data, train_data))
-autoencoder_test_ds = tf.data.Dataset.from_tensor_slices((test_data, test_data))
+# create tensorflow dataset for autoencoder
+ae_train_ds = Dataset.from_tensor_slices((train_data, train_data))
+ae_test_ds = Dataset.from_tensor_slices((test_data, test_data))
 
 # create autoencoder model
-autoencoder = Autoencoder(train_data.shape[1:], 16)
+encoder = Model_From_Layers(sparse_ae['encoder'])
+decoder = Model_From_Layers(sparse_ae['decoder'])
+autoencoder = Model_From_Layers([encoder, decoder])
 
 # train autoencoder model
-autoencoder_train_loss, autoencoder_test_loss = train_autoencoder(autoencoder, autoencoder_train_ds, autoencoder_test_ds, show=True)
+ae_train_loss, ae_test_loss = train_from_config(
+    autoencoder, ae_train_ds, ae_test_ds, sparse_ae['training'], show=True
+)
