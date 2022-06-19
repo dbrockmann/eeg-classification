@@ -55,7 +55,7 @@ convolutional_ae = {
     'batch_size': 32,
     'loss_function': MeanSquaredError(),
     'optimizer': Adam(
-        lr=0.001
+        learning_rate=0.001
     ),
     'epochs': 20,
 
@@ -64,7 +64,7 @@ convolutional_ae = {
             target_shape=(-1, 1)
         ),
         Conv1D(
-            units=16, 
+            filters=16, 
             kernel_size=3, 
             padding='same', 
             activation='relu'
@@ -73,7 +73,7 @@ convolutional_ae = {
             pool_size=2
         ),
         Conv1D(
-            units=32, 
+            filters=32, 
             kernel_size=3, 
             padding='same', 
             activation='relu'
@@ -82,7 +82,7 @@ convolutional_ae = {
             pool_size=2
         ),
         Conv1D(
-            units=64, 
+            filters=64, 
             kernel_size=3, 
             padding='same', 
             activation='relu'
@@ -108,7 +108,7 @@ convolutional_ae = {
             target_shape=(240 // 2**3, 64)
         ),
         Conv1DTranspose(
-            units=64, 
+            filters=64, 
             kernel_size=3, 
             padding='same', 
             activation='relu'
@@ -117,7 +117,7 @@ convolutional_ae = {
             size=2
         ),
         Conv1DTranspose(
-            units=32, 
+            filters=32, 
             kernel_size=3, 
             padding='same', 
             activation='relu'
@@ -126,7 +126,7 @@ convolutional_ae = {
             size=2
         ),
         Conv1DTranspose(
-            units=16, 
+            filters=16, 
             kernel_size=3, 
             padding='same', 
             activation='relu'
@@ -135,7 +135,7 @@ convolutional_ae = {
             size=2
         ),
         Conv1D(
-            units=1, 
+            filters=1, 
             kernel_size=3, 
             padding='same', 
             activation='sigmoid'

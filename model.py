@@ -14,7 +14,7 @@ class Model_From_Layers(Model):
 
         super(Model_From_Layers, self).__init__()
 
-        self.layers = layers
+        self.model_layers = layers
 
     @tf_function
     def call(self, x, training):
@@ -30,7 +30,7 @@ class Model_From_Layers(Model):
             output of the model
         """
 
-        for layer in self.layers:
+        for layer in self.model_layers:
             x = layer(x, training=training)
         
         return x

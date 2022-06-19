@@ -9,7 +9,7 @@ softmax_cf = {
         'batch_size': 32,
         'loss_function': BinaryCrossentropy(),
         'optimizer': Adam(
-            lr=0.001
+            learning_rate=0.001
         ),
         'epochs': 10
     },
