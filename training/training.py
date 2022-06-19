@@ -1,24 +1,30 @@
 
-import tensorflow as tf
+from tensorflow import GradientTape
 import numpy as np
 
 
-def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs, show=False):
+def train_from_config(model, train_ds, test_ds, config, show=False):
     """
-    Training loop with testing
+    Training loop with testing from configuration
 
     Args:
         model: the model to train
         train_ds: train dataset
         test_ds: test dataset
-        loss_fn: loss function
-        optimizer: the optimizer
-        epochs: number of epochs to train
+        config:
+            batch_size: batch size
+            loss_function: loss function
+            optimizer: the optimizer
+            epochs: number of epochs to train
         show: print loss after every epoch
 
     Returns:
         aggregated training and test losses
     """
+
+    # batch and prefetch
+    train_ds = train_ds.batch(config['batch_size']).prefetch(1)
+    test_ds = test_ds.batch(config['batch_size']).prefetch(1)
 
     # train loss aggregator
     train_loss_agg = []
@@ -27,11 +33,11 @@ def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs, show=False
     test_loss_agg = []
 
     # test on train data before first training
-    train_loss = test(model, train_ds, loss_fn)
+    train_loss = test(model, train_ds, config['loss_function'])
     train_loss_agg.append(train_loss)
 
     # test on test data before first training
-    test_loss = test(model, test_ds, loss_fn)
+    test_loss = test(model, test_ds, config['loss_function'])
     test_loss_agg.append(test_loss)
 
     # print loss if show flag is set
@@ -39,14 +45,14 @@ def train_model(model, train_ds, test_ds, loss_fn, optimizer, epochs, show=False
         print(f'Epoch 0: train loss {train_loss}, test loss {test_loss}')
 
     # repeat training/testing for number of epochs
-    for epoch in range(epochs):
+    for epoch in range(config['epochs']):
 
         # training
-        train_loss = train(model, train_ds, loss_fn, optimizer)
+        train_loss = train(model, train_ds, config['loss_function'], config['optimizer'])
         train_loss_agg.append(train_loss)
 
         # testing
-        test_loss = test(model, test_ds, loss_fn)
+        test_loss = test(model, test_ds, config['loss_function'])
         test_loss_agg.append(test_loss)
 
         # print loss if show flag is set
@@ -108,7 +114,7 @@ def train_step(model, x, t, loss_fn, optimizer, training):
         calculated loss
     """
 
-    with tf.GradientTape() as tape:
+    with GradientTape() as tape:
 
         # forward step
         prediction = model(x, training)
