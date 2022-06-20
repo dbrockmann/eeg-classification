@@ -3,71 +3,71 @@ from tensorflow import GradientTape
 import numpy as np
 
 
-def train_from_config(model, train_ds, test_ds, config, show=False):
+def train_model(model, train_ds, test_ds, epochs=20, show=True):
     """
-    Training loop with testing from configuration
+    Training loop with testing
 
     Args:
         model: the model to train
         train_ds: train dataset
         test_ds: test dataset
-        config: dictionary with training configurations
+        epochs: epochs to train
         show: print loss after every epoch
 
     Returns:
         aggregated training and test losses
     """
 
-    # batch and prefetch
-    train_ds = train_ds.batch(config['batch_size']).prefetch(1)
-    test_ds = test_ds.batch(config['batch_size']).prefetch(1)
-
     # train loss aggregator
     train_loss_agg = []
 
-    # test loss aggregator
-    test_loss_agg = []
+    # test metrics aggregator
+    metrics_agg = []
 
     # test on train data before first training
-    train_loss = test(model, train_ds, config['loss_function'])
+    train_loss = train(model, train_ds, training=False)
     train_loss_agg.append(train_loss)
 
     # test on test data before first training
-    test_loss = test(model, test_ds, config['loss_function'])
-    test_loss_agg.append(test_loss)
+    test_metric = test(model, test_ds)
+    metrics_agg.append(test_metric)
+
+    # print loss and metrics to console
+    def print_status(epoch, loss, metrics):
+        print(f'{epoch:5}: {loss:15.10}',
+              f'{", ".join(["{0}: {1}".format(name, value) for name, value in metrics.items()])}',
+              sep=5*' ')
 
     # print loss if show flag is set
     if (show):
-        print(f'Epoch 0: train loss {train_loss}, test loss {test_loss}')
+        print_status(0, train_loss, test_metric)
 
     # repeat training/testing for number of epochs
-    for epoch in range(config['epochs']):
+    for epoch in range(epochs):
 
         # training
-        train_loss = train(model, train_ds, config['loss_function'], config['optimizer'])
+        train_loss = train(model, train_ds)
         train_loss_agg.append(train_loss)
 
         # testing
-        test_loss = test(model, test_ds, config['loss_function'])
-        test_loss_agg.append(test_loss)
+        test_metric = test(model, test_ds)
+        metrics_agg.append(test_metric)
 
         # print loss if show flag is set
         if (show):
-            print(f'Epoch {epoch + 1}: train loss {train_loss}, test loss {test_loss}')
+            print_status(epoch + 1, train_loss, test_metric)
 
     # return aggregated training and test losses
-    return train_loss_agg, test_loss_agg
+    return train_loss_agg, metrics_agg
 
 
-def train(model, ds, loss_fn, optimizer, training=True):
+def train(model, ds, training=True):
     """
     Performs training on a full dataset and aggregates the losses
 
     Args:
         model: the model to train
         ds: the train dataset
-        loss_fn: loss function
-        optimizer: the optimizer
         training: flag stating if in training mode
 
     Returns:
@@ -81,7 +81,7 @@ def train(model, ds, loss_fn, optimizer, training=True):
     for x, t in ds:
 
         # calculate loss
-        loss = train_step(model, x, t, loss_fn, optimizer, training)
+        loss = train_step(model, x, t, training)
 
         # append loss
         loss_agg.append(loss.numpy())
@@ -93,7 +93,7 @@ def train(model, ds, loss_fn, optimizer, training=True):
     return loss
 
 
-def train_step(model, x, t, loss_fn, optimizer, training):
+def train_step(model, x, t, training):
     """
     Peforms a training step by doing a forward and backward pass
     through the network
@@ -102,8 +102,6 @@ def train_step(model, x, t, loss_fn, optimizer, training):
         model: the model to train
         x: input
         t: target output
-        loss_fn: loss function
-        optimizer: the optimizer
         training: flag stating if in training mode
 
     Returns:
@@ -116,72 +114,50 @@ def train_step(model, x, t, loss_fn, optimizer, training):
         prediction = model(x, training)
 
         # calculate loss
-        loss = loss_fn(t, prediction)
+        loss = model.loss(t, prediction)
 
         # calculate gradients
         gradients = tape.gradient(loss, model.trainable_variables)
 
     # update weights by applying the gradients
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    if (training):
+        model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
     # return calculated loss
     return loss
 
 
-def test(model, ds, loss_fn, training=False):
+def test(model, ds, training=False):
     """
-    Tests performance on a full dataset and aggregates the losses
+    Tests performance on a full dataset and aggregates the metrics
 
     Args:
         model: the model to train
         ds: the train dataset
-        loss_fn: loss function
         training: flag stating if in training mode
 
     Returns:
-        mean loss
+        metrics
     """
 
-    # loss aggregator
-    loss_agg = []
+    # reset metrics
+    for metric in model.compiled_metrics._metrics:
+        metric.reset_state()
 
     # for input and target in dataset
     for x, t in ds:
 
-        # calculate loss
-        loss = test_step(model, x, t, loss_fn, training)
+        # prediction for input
+        prediction = model(x, training=training)
 
-        # append loss
-        loss_agg.append(loss.numpy())
+        # update states
+        for metric in model.compiled_metrics._metrics:
+            metric.update_state(t, prediction)
 
-    # calculate mean of losses
-    loss = np.mean(loss_agg)
+    # compute metrics
+    metric_values = { 
+        metric.name: metric.result().numpy() for metric in model.compiled_metrics._metrics
+    }
 
     # reaturn mean loss
-    return loss
-
-
-def test_step(model, x, t, loss_fn, training):
-    """
-    Calculates loss by performing a forward
-    step on a test datapoint
-
-    Args:
-        model: the model to test
-        x: input
-        t: target output
-        loss_fn: loss function
-        training: flag stating if in training mode
-
-    Returns:
-        calculated loss
-    """
-
-    # forward step
-    prediction = model(x, training)
-
-    # calculate loss
-    loss = loss_fn(t, prediction)
-
-    # reaturn loss
-    return loss
+    return metric_values
