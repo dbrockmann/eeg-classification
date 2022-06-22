@@ -186,7 +186,7 @@ def prepare_data_autoencoder(X, y):
     b, a = butter_bandpass(LOWCUT,HIGHCUT,SAMPLINGRATE)
 
     #define the windowsize
-    WINDOWSIZE = 241
+    WINDOWSIZE = 256
 
     prepared_data = list()
     prepared_labels = list()
@@ -269,7 +269,7 @@ def prepare_data_features(X, y, COMPONENTS):
 
     # extract statistical features in the different sets
     for X, y in zip(data, labels):
-        windowed_X, windowed_y = windowing(X, y, 241)
+        windowed_X, windowed_y = windowing(X, y, 256)
         denoised_X = wavelet_denoise(windowed_X)
         df_features = extract_features(denoised_X)
         features_data.append(df_features)
