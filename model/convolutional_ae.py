@@ -53,8 +53,7 @@ def build_convolutional_ae(input_dim, latent_dim):
             activation='relu',
             activity_regularizer=L1(
                 l1=0.001
-            ),
-            name='bottleneck'
+            )
         )
     ])
 

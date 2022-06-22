@@ -34,8 +34,8 @@ def train_model(model, train_ds, test_ds, epochs=20, show=True):
 
     # print loss and metrics to console
     def print_status(epoch, loss, metrics):
-        print(f'{epoch:5}: {loss:15.10}',
-              f'{", ".join(["{0}: {1}".format(name, value) for name, value in metrics.items()])}',
+        print(f'{epoch:5}: {loss:10.6}',
+              f'{", ".join(["{0}: {1:10.6}".format(name, value) for name, value in metrics.items()])}',
               sep=5*' ')
 
     # print loss if show flag is set
