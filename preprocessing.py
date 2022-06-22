@@ -72,11 +72,9 @@ def design_scaler(data, type):
 def scale_data(data, scaler):
     """
     Perform standardization by centering and scaling
-
     Args:
         scaler: scaler used to scale the data along the features axis
         data: n-dimensional input array used to scale along the features axis.
-
     Returns:
         scaled_data: standardized n-dimensional array
     """
@@ -178,6 +176,7 @@ def prepare_data_autoencoder(X, y):
 
     # define the scaler (on the test set in order to prevent data leakage)
     scaler = design_scaler(data[0], 'MinMaxScaler')
+
 
     # define the filter coefficients for the butterworth band-pass filter
     LOWCUT = 0.5
