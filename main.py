@@ -40,7 +40,7 @@ autoencoder = build_sparse_ae(
 
 # train autoencoder
 ae_train_loss, ae_metrics = train_model(
-    autoencoder, ae_train_ds, ae_test_ds, epochs=300
+    autoencoder, ae_train_ds, ae_test_ds, epochs=10
 )
 
 
@@ -64,5 +64,5 @@ classifier = build_categorical_cf(2)
 
 # train classifier model
 cf_train_loss, cf_metrics = train_model(
-    classifier, cf_train_ds, cf_test_ds, epochs=1000
+    classifier, cf_train_ds, cf_test_ds, epochs=20
 )
