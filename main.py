@@ -6,8 +6,8 @@ from preprocessing import prepare_data
 
 from training import train_model
 
-from model.autoencoder import sparse_ae, convolutional_ae
-from model.classifier import binary_cf
+from model.sparse_ae import build_sparse_ae
+from model.categorical_cf import build_categorical_cf
 
 # load dataset
 X, y = load_dataset('./data/')
@@ -32,25 +32,37 @@ ae_test_ds = Dataset.from_tensor_slices((test_data, test_data))
 ae_train_ds = ae_train_ds.shuffle(len(train_data)).batch(32).prefetch(1)
 ae_test_ds = ae_test_ds.shuffle(len(test_data)).batch(32).prefetch(1)
 
-# train autoencoder model
+# build autoencoder model
+autoencoder = build_sparse_ae(
+    input_dim=train_data.shape[-1],
+    latent_dim=8
+)
+
+# train autoencoder
 ae_train_loss, ae_metrics = train_model(
-    sparse_ae, ae_train_ds, ae_test_ds, epochs=20
+    autoencoder, ae_train_ds, ae_test_ds, epochs=300
 )
 
 
+# extract encoder from autoencoder
+encoder = autoencoder.layers[0]
+
 # apply trained autoencoder on datasets
-cf_train_data = sparse_ae.predict(train_data)
-cf_test_data = sparse_ae.predict(test_data)
+cf_train_data = encoder.predict(train_data)
+cf_test_data = encoder.predict(test_data)
 
 # create dataset for autoencoder
 cf_train_ds = Dataset.from_tensor_slices((cf_train_data, train_labels))
 cf_test_ds = Dataset.from_tensor_slices((cf_test_data, test_labels))
 
 # shuffle, batch and prefetch
-cf_train_ds = cf_train_ds.shuffle(len(cf_train_data)).batch(32).prefetch(1)
-cf_test_ds = cf_test_ds.shuffle(len(cf_test_data)).batch(32).prefetch(1)
+cf_train_ds = cf_train_ds.shuffle(len(train_data)).batch(32).prefetch(1)
+cf_test_ds = cf_test_ds.shuffle(len(test_data)).batch(32).prefetch(1)
+
+# build classifier model
+classifier = build_categorical_cf(2)
 
 # train classifier model
 cf_train_loss, cf_metrics = train_model(
-    binary_cf, cf_train_ds, cf_test_ds, epochs=10
+    classifier, cf_train_ds, cf_test_ds, epochs=1000
 )

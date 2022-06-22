@@ -29,9 +29,8 @@ def build_sparse_ae(input_dim, latent_dim):
             units=latent_dim, 
             activation='sigmoid',
             activity_regularizer=L1(
-                l1=0.001
-            ),
-            name='bottleneck'
+                l1=0.005
+            )
         )
     ])
 

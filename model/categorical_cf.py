@@ -1,4 +1,5 @@
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense
@@ -26,10 +27,13 @@ class BalancedSparseCategoricalAccuracy(SparseCategoricalAccuracy):
             name=name, dtype=dtype
         )
 
+        # aggregate states
+        self.y_true = None
+        self.y_pred = None
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         """
-        Update state with sample weight calculated from 
-        the labels
+        Update state
 
         Args:
             y_true: ground truth label values
@@ -37,18 +41,50 @@ class BalancedSparseCategoricalAccuracy(SparseCategoricalAccuracy):
             sample_weight: coefficient for metric
         """
 
+        # concat states
+        if self.y_true is not None:
+            self.y_true = tf.concat([self.y_true, y_true], 0)
+            self.y_pred = tf.concat([self.y_pred, y_pred], 0)
+
+        # initialize with state
+        else:
+            self.y_true = y_true
+            self.y_pred = y_pred
+
+    def reset_state(self):
+        """
+        Reset state
+        """
+
+        self.y_true = None
+        self.y_pred = None
+
+        super(BalancedSparseCategoricalAccuracy, self).reset_state()
+
+    def result(self):
+        """
+        Calculate result with sample weight calculated from 
+        the labels
+
+        Returns:
+            resulting metric
+        """
+
         # calculate weights according to occurence
-        if not sample_weight:
-            y_true_int = tf.cast(y_true, tf.int32)
-            counts = tf.math.bincount(y_true_int)
-            weights = tf.math.reciprocal_no_nan(tf.cast(counts, self.dtype))
-            sample_weight = tf.gather(weights, y_true_int)
-        print(sample_weight)
+        y_true_int = tf.cast(self.y_true, tf.int32)
+        counts = tf.math.bincount(y_true_int)
+        weights = tf.math.reciprocal_no_nan(tf.cast(counts, self.dtype))
+        sample_weight = tf.gather(weights, y_true_int)
 
         # update state with weights
         super(BalancedSparseCategoricalAccuracy, self).update_state(
-            y_true, y_pred, sample_weight=sample_weight
+            self.y_true, self.y_pred, sample_weight=sample_weight
         )
+
+        # calculate result
+        result = super(BalancedSparseCategoricalAccuracy, self).result()
+
+        return result
 
 
 def build_categorical_cf(class_dim):
