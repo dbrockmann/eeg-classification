@@ -35,4 +35,5 @@ def load_dataset(data_dir):
     data = np.concatenate(data_per_recording)
     labels = np.concatenate(labels_per_set, axis = 0)
 
-    return data, labels
+    # omit last datapoint for better usability with regard to windowing and convolutional autoencoders
+    return data[:,:-1], labels

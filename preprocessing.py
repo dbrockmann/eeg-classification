@@ -1,7 +1,12 @@
 import numpy as np
+import pandas as pd
+import pywt
 from scipy.signal import butter, lfilter
-from sklearn.preprocessing import MinMaxScaler
+from scipy.stats import skew
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+from skimage.restoration import denoise_wavelet
 
 def butter_bandpass(lowcut, highcut, frequency, order=5):
     """
@@ -44,7 +49,7 @@ def butter_bandpass_filter(data, b, a):
 
     return y
 
-def minmax_scaler(data):
+def design_scaler(data, type):
     """
     Design the scaler.
 
@@ -54,19 +59,22 @@ def minmax_scaler(data):
     Returns:
         fitted_scaler: fitted scaler
     """
-    scaler = MinMaxScaler()
-    fitted_scaler = scaler.fit(data)
+    if type == 'StandardScaler':
+        scaler = StandardScaler()
+        fitted_scaler = scaler.fit(data)
+
+    if type == 'MinMaxScaler':
+        scaler = MinMaxScaler()
+        fitted_scaler = scaler.fit(data)
 
     return fitted_scaler
 
-def normalize_data(scaler, data):
+def scale_data(data, scaler):
     """
-    Scales each feature to a range between zero and one.
-
+    Perform standardization by centering and scaling
     Args:
         scaler: scaler used to scale the data along the features axis
         data: n-dimensional input array used to scale along the features axis.
-
     Returns:
         scaled_data: standardized n-dimensional array
     """
@@ -148,7 +156,7 @@ def split_dataset(X, y):
 
     return data, labels
 
-def prepare_data(X, y):
+def prepare_data_autoencoder(X, y):
     """
     Apply all preproccesing steps to the specified data set. This includes splitting the
     data into a training, test and validation set, filtering the data, standardizing the
@@ -167,7 +175,8 @@ def prepare_data(X, y):
     data, labels = split_dataset(X, y)
 
     # define the scaler (on the test set in order to prevent data leakage)
-    scaler = minmax_scaler(data[0])
+    scaler = design_scaler(data[0], 'MinMaxScaler')
+
 
     # define the filter coefficients for the butterworth band-pass filter
     LOWCUT = 0.5
@@ -177,7 +186,7 @@ def prepare_data(X, y):
     b, a = butter_bandpass(LOWCUT,HIGHCUT,SAMPLINGRATE)
 
     #define the windowsize
-    WINDOWSIZE = 241
+    WINDOWSIZE = 256
 
     prepared_data = list()
     prepared_labels = list()
@@ -185,9 +194,99 @@ def prepare_data(X, y):
     # apply the preprocessing pipeline to the different sets
     for X, y in zip(data, labels):
         filtered_X = butter_bandpass_filter(X,b,a)
-        normalized_X = normalize_data(scaler, filtered_X)
-        prepared_X, prepared_y = windowing(normalized_X, y, WINDOWSIZE)
+        standardized_X = scale_data(filtered_X, scaler)
+        prepared_X, prepared_y = windowing(standardized_X, y, WINDOWSIZE)
         prepared_data.append(prepared_X)
         prepared_labels.append(prepared_y)
 
     return prepared_data, prepared_labels
+
+def wavelet_denoise(data):
+    """
+    Perform Daubechies wavelet threshold denoising.
+
+    Args:
+        data: n-dimensional input array containg the data vectors
+
+    Returns:
+        y: denoised n-dimensional array containg the data vectors
+    """
+    y = denoise_wavelet(data, wavelet='db4', mode='soft', wavelet_levels=5, method='VisuShrink', rescale_sigma='True')
+    return y
+
+def extract_features(X):
+
+    recordings = {}
+    feature_names = ['min_data', 'max_data', 'mav_data', 'mean_data', 'avp_data', 'std_data', 'var_data', 'skew_data']
+    subband_names = ['A5', 'D5', 'D4', 'D3', 'D2', 'D1']
+    names = [f'{feature}_{subband}' for subband in subband_names for feature in feature_names]
+
+    for k in range(X.shape[0]):
+        feature_list = []
+        coeffs = pywt.wavedecn(X[k], wavelet='db4', level=5, mode='per')
+        for coeff in coeffs:
+            if isinstance(coeff, dict):
+                features = get_features(coeff['d'])
+                feature_list.extend(features.values())
+            else:
+                features = get_features(coeff)
+                feature_list.extend(features.values())
+        recordings['recording_' + str(k + 1)] = feature_list
+
+    return pd.DataFrame.from_dict(recordings, orient='index', columns=names)
+
+def get_features(X):
+
+    return {'min_data': X.min(),
+            'max_data': X.max(),
+            'mav_data': np.mean(abs(X)),
+            'mean_data': np.mean(X),
+            'avp_data': np.mean(abs(X)**2),
+            'std_data': X.std(),
+            'var_data': X.var(),
+            'skew_data': skew(X)}
+
+def fit_pca_model(X, components):
+    pca = PCA(n_components = components)
+    pca_model = pca.fit(X)
+
+    return pca_model
+
+def pca_dim_reduction(X, pca, components):
+
+    columns = [f'pc_{num}' for num in range(1,components+1)]
+    df_pca = pd.DataFrame(pca.transform(X), columns=columns, index=X.index)
+
+    return df_pca
+
+def prepare_data_features(X, y, COMPONENTS):
+
+    # split the data in a train, test and validation set in a 70:15:15 ratio
+    data, labels = split_dataset(X, y)
+
+    features_data = list()
+    features_labels = list()
+
+    # extract statistical features in the different sets
+    for X, y in zip(data, labels):
+        windowed_X, windowed_y = windowing(X, y, 256)
+        denoised_X = wavelet_denoise(windowed_X)
+        df_features = extract_features(denoised_X)
+        features_data.append(df_features)
+        features_labels.append(windowed_y)
+
+    # define the scaler (on the features extracted from the test set in order to prevent data leakage)
+    scaler = design_scaler(features_data[0].to_numpy(), 'StandardScaler')
+
+    # standardize the features in the different sets
+    for i, df in enumerate(features_data):
+        features_data[i] = pd.DataFrame(scale_data(df.to_numpy(), scaler), columns=list(df.columns), index=df.index)
+
+    # fit pca model (on the features extracted from the test set in order to prevent data leakage)
+    pca = fit_pca_model(features_data[0], COMPONENTS)
+
+    # reduce dimensions to the size of COMPONENTS
+    for i, df in enumerate(features_data):
+        features_data[i] = pca_dim_reduction(df, pca, COMPONENTS).to_numpy()
+
+    return features_data, features_labels

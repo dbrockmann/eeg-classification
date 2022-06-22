@@ -2,18 +2,20 @@
 from tensorflow.data import Dataset
 
 from dataset import load_dataset
-from preprocessing import prepare_data
+from preprocessing import prepare_data_autoencoder, prepare_data_features
 
 from training import train_model
 
 from model.sparse_ae import build_sparse_ae
 from model.categorical_cf import build_categorical_cf
 
+
 # load dataset
 X, y = load_dataset('./data/')
 
 # apply preprocessing
-data, labels = prepare_data(X, y)
+data, labels = prepare_data_autoencoder(X, y)
+#features_data, features_labels = prepare_data_features(X, y, 16)
 
 # cut last feature
 for i, a in enumerate(data):
