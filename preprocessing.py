@@ -156,7 +156,7 @@ def split_dataset(X, y):
 
     return data, labels
 
-def prepare_data_autoencoder(X, y):
+def prepare_data_autoencoder(data, labels):
     """
     Apply all preproccesing steps to the specified data set. This includes splitting the
     data into a training, test and validation set, filtering the data, standardizing the
@@ -170,13 +170,8 @@ def prepare_data_autoencoder(X, y):
             data: list containg the preprocessed training, test and validation sets of data vectors
             labels: list containing the preprocessed training, test and validation sets of target values
     """
-
-    # split the data in a train, test and validation set in a 70:15:15 ratio
-    data, labels = split_dataset(X, y)
-
     # define the scaler (on the test set in order to prevent data leakage)
     scaler = design_scaler(data[0], 'MinMaxScaler')
-
 
     # define the filter coefficients for the butterworth band-pass filter
     LOWCUT = 0.5
@@ -259,10 +254,7 @@ def pca_dim_reduction(X, pca, components):
 
     return df_pca
 
-def prepare_data_features(X, y, COMPONENTS):
-
-    # split the data in a train, test and validation set in a 70:15:15 ratio
-    data, labels = split_dataset(X, y)
+def prepare_data_features(data, labels, COMPONENTS):
 
     features_data = list()
     features_labels = list()
