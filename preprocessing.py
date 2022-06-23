@@ -259,20 +259,17 @@ def prepare_data_features(data, labels, COMPONENTS):
     features_data = list()
     features_labels = list()
 
-    # extract statistical features in the different sets
+    # define the scaler (on the test set in order to prevent data leakage)
+    scaler = design_scaler(data[0], 'StandardScaler')
+
+    # extract statistical features in the different preprocessed sets
     for X, y in zip(data, labels):
-        windowed_X, windowed_y = windowing(X, y, 256)
+        standardized_X = scale_data(X, scaler)
+        windowed_X, windowed_y = windowing(standardized_X, y, 256)
         denoised_X = wavelet_denoise(windowed_X)
         df_features = extract_features(denoised_X)
         features_data.append(df_features)
         features_labels.append(windowed_y)
-
-    # define the scaler (on the features extracted from the test set in order to prevent data leakage)
-    scaler = design_scaler(features_data[0].to_numpy(), 'StandardScaler')
-
-    # standardize the features in the different sets
-    for i, df in enumerate(features_data):
-        features_data[i] = pd.DataFrame(scale_data(df.to_numpy(), scaler), columns=list(df.columns), index=df.index)
 
     # fit pca model (on the features extracted from the test set in order to prevent data leakage)
     pca = fit_pca_model(features_data[0], COMPONENTS)
