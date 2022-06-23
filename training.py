@@ -38,8 +38,9 @@ def train_model(model, train_ds, test_ds, epochs=20, show=True):
               f'{", ".join(["{0}: {1:10.6}".format(name, value) for name, value in metrics.items()])}',
               sep=5*' ')
 
-    # print loss if show flag is set
+    # print model summary and loss if show flag is set
     if (show):
+        model.summary()
         print_status(0, train_loss, test_metric)
 
     # repeat training/testing for number of epochs
