@@ -2,11 +2,11 @@
 from tensorflow.data import Dataset
 
 from preprocessing import prepare_data_features
-from training import train_model
+from training import train_model, test
 from model.categorical_cf import build_categorical_cf
 
 
-def handcrafted_classification(data, labels, feature_dim=16):
+def handcrafted_classification(X, y, feature_dim=16, show=True):
     """
     Performs handcrafted feature extraction with 
     principle component analysis and classification
@@ -15,6 +15,10 @@ def handcrafted_classification(data, labels, feature_dim=16):
         data: splitted data
         labels: class labels
         feature_dim: number of features
+        show: print updates
+
+    Returns:
+        test and validation metrics
     """
 
     # apply preprocessing
@@ -33,9 +37,21 @@ def handcrafted_classification(data, labels, feature_dim=16):
     test_ds = test_ds.shuffle(len(test_data)).batch(32).prefetch(1)
 
     # build classifier model
-    classifier = build_categorical_cf(2)
+    classifier = build_categorical_cf(class_dim=2)
 
     # train classifier model
     train_loss, metrics = train_model(
-        classifier, train_ds, test_ds, epochs=1000
+        classifier, train_ds, test_ds, epochs=400, show=show
     )
+
+
+    # dataset for validation
+    val_ds = Dataset.from_tensor_slices((val_data, val_labels))
+
+    # shuffle, batch and prefetch
+    val_ds = val_ds.shuffle(len(val_data)).batch(32).prefetch(1)
+
+    # test on validation set
+    val_metrics = test(classifier, val_ds)
+
+    return train_loss, metrics, val_metrics
