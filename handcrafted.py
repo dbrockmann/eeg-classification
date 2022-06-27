@@ -12,8 +12,8 @@ def handcrafted_classification(X, y, feature_dim=16, show=True):
     principle component analysis and classification
 
     Args:
-        X: raw data
-        y: class labels
+        data: splitted data
+        labels: class labels
         feature_dim: number of features
         show: print updates
 
@@ -22,7 +22,7 @@ def handcrafted_classification(X, y, feature_dim=16, show=True):
     """
 
     # apply preprocessing
-    data, labels = prepare_data_features(X, y, feature_dim)
+    data, labels = prepare_data_features(data, labels, feature_dim)
 
     # extract splitted data
     train_data, test_data, val_data = data

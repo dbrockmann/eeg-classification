@@ -1,10 +1,12 @@
 
 from dataset import load_dataset
+from preprocessing import split_dataset
 from autoencoder import autoencoder_classification
 from handcrafted import handcrafted_classification
 
 # load dataset
 X, y = load_dataset('./data/')
+
 # split the data in a train, test and validation set in a 70:15:15 ratio
 data, labels = split_dataset(X, y)
 
