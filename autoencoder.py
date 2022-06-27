@@ -17,6 +17,7 @@ def autoencoder_classification(data, labels, feature_dim=16, show=True):
         data: splitted data
         labels: class labels
         feature_dim: number of features
+        show: print updates
 
     Returns:
         test and validation metrics
