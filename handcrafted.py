@@ -6,7 +6,7 @@ from training import train_model, test
 from model.categorical_cf import build_categorical_cf
 
 
-def handcrafted_classification(X, y, feature_dim=16, show=True):
+def handcrafted_classification(data, labels, feature_dim=16, show=True):
     """
     Performs handcrafted feature extraction with 
     principle component analysis and classification
@@ -41,7 +41,7 @@ def handcrafted_classification(X, y, feature_dim=16, show=True):
 
     # train classifier model
     train_loss, metrics = train_model(
-        classifier, train_ds, test_ds, epochs=400, show=show
+        classifier, train_ds, test_ds, epochs=150, show=show
     )
 
 
