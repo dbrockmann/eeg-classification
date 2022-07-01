@@ -39,12 +39,12 @@ def build_sparse_ae(input_dim, latent_dim):
 
     decoder = Sequential([
         Dense(
-            units=128, 
+            units=64, 
             activation='elu',
             kernel_initializer='he_normal'
         ),
         Dense(
-            units=64, 
+            units=128, 
             activation='elu',
             kernel_initializer='he_normal'
         ),
