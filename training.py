@@ -1,4 +1,5 @@
 
+import tensorflow as tf
 from tensorflow import GradientTape
 import numpy as np
 
@@ -141,6 +142,9 @@ def test(model, ds, training=False):
         metrics
     """
 
+    # loss aggregator
+    loss_agg = []
+
     # reset metrics
     for metric in model.compiled_metrics._metrics:
         metric.reset_state()
@@ -151,14 +155,22 @@ def test(model, ds, training=False):
         # prediction for input
         prediction = model(x, training=training)
 
+        # calculate loss
+        loss = model.loss(t, prediction)
+        loss_agg.append(loss)
+
         # update states
         for metric in model.compiled_metrics._metrics:
             metric.update_state(t, prediction)
 
-    # compute metrics
-    metric_values = { 
-        metric.name: metric.result().numpy() for metric in model.compiled_metrics._metrics
+    # loss metric
+    metric_values = {
+        'loss': tf.reduce_mean(loss_agg)
     }
+
+    # compute metrics
+    for metric in model.compiled_metrics._metrics:
+        metric_values[metric.name] = metric.result().numpy()
 
     # reaturn mean loss
     return metric_values

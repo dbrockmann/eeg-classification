@@ -10,6 +10,11 @@ X, y = load_dataset('./data/')
 # split the data in a train, test and validation set in a 70:15:15 ratio
 data, labels = split_dataset(X, y)
 
+
+ae_hist, cf_hist = autoencoder_classification(data, labels, feature_dim=16)
+
+exit()
+
 # number of features to extract
 feature_dims = [2, 4, 8, 16, 32]
 

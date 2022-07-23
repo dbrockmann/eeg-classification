@@ -14,6 +14,9 @@ def build_convolutional_ae(input_dim, latent_dim):
     Args:
         input_dim: input dimensions
         latent_dim: bottleneck dimensions, latent space
+
+    Returns:
+        convolutional autoencoder model, encoder model
     """
     
     encoder = Sequential([
@@ -106,10 +109,8 @@ def build_convolutional_ae(input_dim, latent_dim):
             learning_rate=0.001
         ),
         loss=MeanSquaredError(),
-        metrics=[
-            MeanSquaredErrorMetric(name='MSE')
-        ]
+        metrics=[]
     )
 
-    return convolutional_ae
+    return convolutional_ae, encoder
     

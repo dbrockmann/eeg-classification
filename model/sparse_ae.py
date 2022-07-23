@@ -14,6 +14,9 @@ def build_sparse_ae(input_dim, latent_dim):
     Args:
         input_dim: input dimensions
         latent_dim: bottleneck dimensions, latent space
+
+    Returns:
+        sparse autoencoder model, encoder model
     """
 
     encoder = Sequential([
@@ -61,9 +64,7 @@ def build_sparse_ae(input_dim, latent_dim):
             learning_rate=0.001
         ),
         loss=MeanSquaredError(),
-        metrics=[
-            MeanSquaredErrorMetric(name='MSE')
-        ]
+        metrics=[]
     )
 
-    return sparse_ae
+    return sparse_ae, encoder

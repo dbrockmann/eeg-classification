@@ -3,7 +3,8 @@ from tensorflow.data import Dataset
 
 from preprocessing import prepare_data_autoencoder
 from training import train_model, test
-from model.sparse_ae import build_sparse_ae as build_ae
+#from model.sparse_ae import build_sparse_ae as build_ae
+from model.variational_ae import build_variational_ae as build_ae
 #from model.convolutional_ae import build_convolutional_ae as build_ae
 from model.categorical_cf import build_categorical_cf
 
@@ -39,7 +40,7 @@ def autoencoder_classification(data, labels, feature_dim=16, show=True):
     ae_test_ds = ae_test_ds.shuffle(len(test_data)).batch(32).prefetch(1)
 
     # build autoencoder model
-    autoencoder = build_ae(
+    autoencoder, encoder = build_ae(
         input_dim=train_data.shape[-1],
         latent_dim=feature_dim
     )
@@ -48,14 +49,11 @@ def autoencoder_classification(data, labels, feature_dim=16, show=True):
     ae_train_loss, ae_metrics = train_model(
         autoencoder, ae_train_ds, ae_test_ds, epochs=40, show=show
     )
-
-
-    # extract encoder from autoencoder
-    encoder = autoencoder.layers[0]
+    
 
     # apply trained autoencoder on datasets
-    cf_train_data = encoder.predict(train_data)
-    cf_test_data = encoder.predict(test_data)
+    cf_train_data = encoder.predict(train_data, verbose=1 if show else 0)
+    cf_test_data = encoder.predict(test_data, verbose=1 if show else 0)
 
     # create dataset for classifier
     cf_train_ds = Dataset.from_tensor_slices((cf_train_data, train_labels))
