@@ -19,17 +19,20 @@ def build_sparse_ae(input_dim, latent_dim):
     encoder = Sequential([
         Dense(
             units=128, 
-            activation='relu'
+            activation='elu',
+            kernel_initializer='he_normal'
         ),
         Dense(
             units=64, 
-            activation='relu'
+            activation='elu',
+            kernel_initializer='he_normal'
         ),
         Dense(
             units=latent_dim, 
-            activation='sigmoid',
+            activation='elu',
+            kernel_initializer='he_normal',
             activity_regularizer=L1(
-                l1=0.005
+                l1=0.001
             )
         )
     ])
@@ -37,11 +40,13 @@ def build_sparse_ae(input_dim, latent_dim):
     decoder = Sequential([
         Dense(
             units=64, 
-            activation='relu'
+            activation='elu',
+            kernel_initializer='he_normal'
         ),
         Dense(
             units=128, 
-            activation='relu'
+            activation='elu',
+            kernel_initializer='he_normal'
         ),
         Dense(
             units=input_dim, 

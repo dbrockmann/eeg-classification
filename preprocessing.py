@@ -156,7 +156,7 @@ def split_dataset(X, y):
 
     return data, labels
 
-def prepare_data_autoencoder(X, y):
+def prepare_data_autoencoder(data, labels):
     """
     Apply all preproccesing steps to the specified data set. This includes splitting the
     data into a training, test and validation set, filtering the data, standardizing the
@@ -170,13 +170,8 @@ def prepare_data_autoencoder(X, y):
             data: list containg the preprocessed training, test and validation sets of data vectors
             labels: list containing the preprocessed training, test and validation sets of target values
     """
-
-    # split the data in a train, test and validation set in a 70:15:15 ratio
-    data, labels = split_dataset(X, y)
-
     # define the scaler (on the test set in order to prevent data leakage)
     scaler = design_scaler(data[0], 'MinMaxScaler')
-
 
     # define the filter coefficients for the butterworth band-pass filter
     LOWCUT = 0.5
@@ -259,28 +254,22 @@ def pca_dim_reduction(X, pca, components):
 
     return df_pca
 
-def prepare_data_features(X, y, COMPONENTS):
-
-    # split the data in a train, test and validation set in a 70:15:15 ratio
-    data, labels = split_dataset(X, y)
+def prepare_data_features(data, labels, COMPONENTS):
 
     features_data = list()
     features_labels = list()
 
-    # extract statistical features in the different sets
+    # define the scaler (on the test set in order to prevent data leakage)
+    scaler = design_scaler(data[0], 'StandardScaler')
+
+    # extract statistical features in the different preprocessed sets
     for X, y in zip(data, labels):
-        windowed_X, windowed_y = windowing(X, y, 256)
+        standardized_X = scale_data(X, scaler)
+        windowed_X, windowed_y = windowing(standardized_X, y, 256)
         denoised_X = wavelet_denoise(windowed_X)
         df_features = extract_features(denoised_X)
         features_data.append(df_features)
         features_labels.append(windowed_y)
-
-    # define the scaler (on the features extracted from the test set in order to prevent data leakage)
-    scaler = design_scaler(features_data[0].to_numpy(), 'StandardScaler')
-
-    # standardize the features in the different sets
-    for i, df in enumerate(features_data):
-        features_data[i] = pd.DataFrame(scale_data(df.to_numpy(), scaler), columns=list(df.columns), index=df.index)
 
     # fit pca model (on the features extracted from the test set in order to prevent data leakage)
     pca = fit_pca_model(features_data[0], COMPONENTS)
