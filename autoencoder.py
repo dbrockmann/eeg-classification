@@ -54,8 +54,8 @@ def autoencoder_classification(data, labels, feature_dim=16, show=True):
     encoder = autoencoder.layers[0]
 
     # apply trained autoencoder on datasets
-    cf_train_data = encoder.predict(train_data)
-    cf_test_data = encoder.predict(test_data)
+    cf_train_data = encoder.predict(train_data, verbose=0)
+    cf_test_data = encoder.predict(test_data, verbose=0)
 
     # create dataset for classifier
     cf_train_ds = Dataset.from_tensor_slices((cf_train_data, train_labels))
@@ -76,7 +76,7 @@ def autoencoder_classification(data, labels, feature_dim=16, show=True):
 
     # datasets for validation
     ae_val_ds = Dataset.from_tensor_slices((val_data, val_data))
-    cf_val_data = encoder.predict(val_data)
+    cf_val_data = encoder.predict(val_data, verbose=0)
     cf_val_ds = Dataset.from_tensor_slices((cf_val_data, val_labels))
 
     # shuffle, batch and prefetch
