@@ -11,12 +11,17 @@ X, y = load_dataset('./data/')
 data, labels = split_dataset(X, y)
 
 # number of features to extract
-feature_dim = 16
+feature_dims = [2, 4, 8, 16, 32]
 
 # perform autoencoder feature extraction
 # and classification
-autoencoder_classification(data, labels, feature_dim=feature_dim)
+for feature_dim in feature_dims:
+    ae_hist, cf_hist = autoencoder_classification(data, labels, feature_dim=feature_dim, show=False)
+    print('autoencoder reconstruction', feature_dim, ':', 'test', ae_hist[1][-1], 'val', ae_hist[2])
+    print('autoencoder', feature_dim, ':', 'test', cf_hist[1][-1], 'val', cf_hist[2])
 
 # perform handcrafted feature extraction
 # and classification
-handcrafted_classification(data, labels, feature_dim=feature_dim)
+for feature_dim in feature_dims:
+    hist = handcrafted_classification(data, labels, feature_dim=feature_dim, show=False)
+    print('handcrafted', feature_dim, ':', 'test', hist[1][-1], 'val', hist[2])
