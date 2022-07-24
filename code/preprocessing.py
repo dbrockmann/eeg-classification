@@ -55,7 +55,7 @@ def design_scaler(data, type):
 
     Args:
         data: n-dimensional input array used to compute the mean and standard deviation used for later scaling
-
+        type: string specifying the type of the scaler
     Returns:
         fitted_scaler: fitted scaler
     """
@@ -71,10 +71,12 @@ def design_scaler(data, type):
 
 def scale_data(data, scaler):
     """
-    Perform standardization by centering and scaling
+    Scale the data along the feature axis.
+    
     Args:
-        scaler: scaler used to scale the data along the features axis
         data: n-dimensional input array used to scale along the features axis.
+        scaler: scaler used to scale the data along the features axis
+        
     Returns:
         scaled_data: standardized n-dimensional array
     """
@@ -158,17 +160,16 @@ def split_dataset(X, y):
 
 def prepare_data_autoencoder(data, labels):
     """
-    Apply all preproccesing steps to the specified data set. This includes splitting the
-    data into a training, test and validation set, filtering the data, standardizing the
-    data and finally the windowing of the data.
+    Apply all preproccesing steps of the autoencoder pipeline to the specified data set. 
+    This includes filtering the data, standardizing the data and finally the windowing of the data.
 
         Args:
-            X: n-dimensional input array containg the data vectors
-            y: 1d input array containg the target values
+            data: n-dimensional input array containg the data vectors
+            labels: 1d input array containg the target values
 
         Returns:
-            data: list containg the preprocessed training, test and validation sets of data vectors
-            labels: list containing the preprocessed training, test and validation sets of target values
+            prepared_data: list containg the preprocessed training, test and validation sets of data vectors
+            prepared_labels: list containing the preprocessed training, test and validation sets of target values
     """
     # define the scaler (on the test set in order to prevent data leakage)
     scaler = design_scaler(data[0], 'MinMaxScaler')
@@ -198,7 +199,7 @@ def prepare_data_autoencoder(data, labels):
 
 def wavelet_denoise(data):
     """
-    Perform Daubechies wavelet threshold denoising.
+    Perform Daubechies (Db4) wavelet threshold denoising.
 
     Args:
         data: n-dimensional input array containg the data vectors
@@ -210,7 +211,15 @@ def wavelet_denoise(data):
     return y
 
 def extract_features(X):
-
+    """
+    Apply fifth-level discrete wavelet transform with Db4 and extract eight statistical on
+    the wavelet sub-bands.
+    
+    Args:
+        X: n-dimensional input array containg the data vectors
+    Returns:
+        Dataframe containing the eight statistical features per sub-band (48 columns)
+    """
     recordings = {}
     feature_names = ['min_data', 'max_data', 'mav_data', 'mean_data', 'avp_data', 'std_data', 'var_data', 'skew_data']
     subband_names = ['A5', 'D5', 'D4', 'D3', 'D2', 'D1']
@@ -218,19 +227,30 @@ def extract_features(X):
 
     for k in range(X.shape[0]):
         feature_list = []
+        # Apply fifth-level discrete wavelet transform with Db4
         coeffs = pywt.wavedecn(X[k], wavelet='db4', level=5, mode='per')
         for coeff in coeffs:
             if isinstance(coeff, dict):
+                # extract statistical features on wavelet subbands
                 features = get_features(coeff['d'])
                 feature_list.extend(features.values())
             else:
                 features = get_features(coeff)
                 feature_list.extend(features.values())
         recordings['recording_' + str(k + 1)] = feature_list
-
+      
     return pd.DataFrame.from_dict(recordings, orient='index', columns=names)
 
 def get_features(X):
+    """
+    Extract statistical features (minimum, maximum, mean, mean of absolute values, average power,
+    standard deviation, variance and skewness)
+    
+    Args:
+        X: n-dimensional input array containg the coefficients of one wavelet sub-band
+    Returns:
+        Dictionary containsing the eight statistical features of the sub-band
+    """
 
     return {'min_data': X.min(),
             'max_data': X.max(),
@@ -242,20 +262,51 @@ def get_features(X):
             'skew_data': skew(X)}
 
 def fit_pca_model(X, components):
+    """
+    Design PCA model. 
+    
+    Args:
+        X: Dataframe containing the eight statistical features per sub-band (48 columns)
+        componenents: integer defining the number of components to keep
+    Returns:
+        pca_model: fitted PCA model
+    """
     pca = PCA(n_components = components)
     pca_model = pca.fit(X)
 
     return pca_model
 
 def pca_dim_reduction(X, pca, components):
-
+    """
+    Perform principal components analysis (PCA) for dimension reduction.
+    
+    Args:
+        X: Dataframe containing the eight statistical features per sub-band (48 columns)
+        pca: fitted PCA model
+        componenents: integer defining the number of components to keep
+    Returns:
+        df_pca: Dataframe containing the projection of X in the principal components
+    """
     columns = [f'pc_{num}' for num in range(1,components+1)]
     df_pca = pd.DataFrame(pca.transform(X), columns=columns, index=X.index)
 
     return df_pca
 
 def prepare_data_features(data, labels, COMPONENTS):
+    """
+    Apply all preproccesing steps of the handcrafted features pipeline to the specified data set. 
+    This includes standardizing the data, windowing the data and denoising it. Additionally, apply 
+    all feature extraction steps. This includes performing DWT, extracting statistical features on
+    the wavelet subbands and running PCA.
 
+        Args:
+            data: n-dimensional input array containg the data vectors
+            labels: 1d input array containg the target values
+
+        Returns:
+            features_data: list containg the preprocessed training, test and validation sets of data vectors
+            features_labels: list containing the preprocessed training, test and validation sets of target values
+    """
     features_data = list()
     features_labels = list()
 
